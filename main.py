@@ -24,12 +24,28 @@ logger = logging.getLogger(__name__)
 stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
 
+# Log environment setup
+logger.info("=" * 50)
+logger.info("STARTUP: Checking environment variables...")
+logger.info(f"STRIPE_SECRET_KEY: {'✓' if os.getenv('STRIPE_SECRET_KEY') else '✗ MISSING'}")
+logger.info(f"STRIPE_WEBHOOK_SECRET: {'✓' if os.getenv('STRIPE_WEBHOOK_SECRET') else '✗ MISSING'}")
+logger.info(f"ANTHROPIC_API_KEY: {'✓' if os.getenv('ANTHROPIC_API_KEY') else '✗ MISSING'}")
+logger.info(f"SENDGRID_API_KEY: {'✓' if os.getenv('SENDGRID_API_KEY') else '✗ MISSING'}")
+logger.info(f"FROM_EMAIL: {os.getenv('FROM_EMAIL', 'NOT SET')}")
+logger.info("=" * 50)
+
 # Initialize bot
-bot = WebsiteAuditBot(
-    anthropic_api_key=os.getenv('ANTHROPIC_API_KEY'),
-    sendgrid_api_key=os.getenv('SENDGRID_API_KEY'),
-    from_email=os.getenv('FROM_EMAIL', 'audits@jarvis-security.bot')
-)
+try:
+    bot = WebsiteAuditBot(
+        anthropic_api_key=os.getenv('ANTHROPIC_API_KEY'),
+        sendgrid_api_key=os.getenv('SENDGRID_API_KEY'),
+        from_email=os.getenv('FROM_EMAIL', 'audits@jarvis-security.bot')
+    )
+    logger.info("✓ WebsiteAuditBot initialized successfully")
+except Exception as e:
+    logger.error(f"✗ Failed to initialize WebsiteAuditBot: {e}", exc_info=True)
+    # Create a stub bot so the app still starts
+    bot = None
 
 # =====================
 # ROUTES
