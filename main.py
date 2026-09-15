@@ -114,13 +114,14 @@ def stripe_webhook():
         website_url = metadata.get('website_url')
         customer_email = metadata.get('customer_email')
         payment_id = payment_intent['id']
+        package = metadata.get('package', 'standard')  # Get package type
         
-        logger.info(f"Payment succeeded for {customer_email}: {website_url}")
+        logger.info(f"Payment succeeded for {customer_email}: {website_url} (package: {package})")
         
         # Start audit in background thread (doesn't block webhook response)
         thread = threading.Thread(
             target=bot.run_audit,
-            args=(website_url, customer_email, payment_id),
+            args=(website_url, customer_email, payment_id, package),
             daemon=True
         )
         thread.start()
@@ -131,15 +132,24 @@ def stripe_webhook():
 
 @app.route('/create-checkout-session', methods=['POST'])
 def create_checkout_session():
-    """Create Stripe checkout session"""
+    """Create Stripe checkout session with package support"""
     try:
         data = request.json
         website_url = data.get('website_url')
         customer_email = data.get('customer_email')
-        amount = data.get('amount', 20000)  # Default €200
+        amount = data.get('amount', 7500)  # Default €75 (standard)
+        package = data.get('package', 'standard')  # Get package type
         
         if not website_url or not customer_email:
             return jsonify({'error': 'Missing required fields'}), 400
+        
+        # Determine package name
+        package_names = {
+            'quick': 'Quick Audit (€25)',
+            'standard': 'Standard Audit (€75)',
+            'pro': 'Pro Audit (€150)'
+        }
+        package_name = package_names.get(package, 'Website Audit')
         
         # Create Stripe checkout session
         session = stripe.checkout.Session.create(
@@ -150,7 +160,7 @@ def create_checkout_session():
                         'currency': 'eur',
                         'unit_amount': amount,  # in cents
                         'product_data': {
-                            'name': 'Website Security & Performance Audit',
+                            'name': package_name,
                             'description': f'Audit for {website_url}',
                         },
                     },
@@ -160,6 +170,7 @@ def create_checkout_session():
             metadata={
                 'website_url': website_url,
                 'customer_email': customer_email,
+                'package': package,
             },
             customer_email=customer_email,
             mode='payment',

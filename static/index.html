@@ -203,6 +203,104 @@
             color: #667eea;
             text-decoration: none;
         }
+        
+        .packages-section {
+            margin-bottom: 40px;
+        }
+        
+        .packages-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        @media (min-width: 900px) {
+            .packages-grid {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+        
+        .package-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            background: white;
+        }
+        
+        .package-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .package-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .package-recommended {
+            border: 2px solid #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+            transform: scale(1.02);
+        }
+        
+        .badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .package-price {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .package-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+        
+        .package-duration {
+            font-size: 13px;
+            color: #9ca3af;
+            margin-bottom: 15px;
+        }
+        
+        .package-features {
+            list-style: none;
+            text-align: left;
+            font-size: 13px;
+            color: #374151;
+        }
+        
+        .package-features li {
+            padding: 6px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .package-features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #16a34a;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -213,21 +311,66 @@
         <div id="error-message" class="error"></div>
         <div id="success-message" class="success"></div>
         
-        <form id="audit-form">
-            <div class="price-box">
-                <div class="price">€200</div>
-                <div class="price-description">Complete Audit Report</div>
+        <!-- Package Selection -->
+        <div class="packages-section">
+            <h2 style="text-align: center; color: #1f2937; margin-bottom: 20px; font-size: 18px;">Choose Your Package</h2>
+            
+            <div class="packages-grid">
+                <!-- Quick Audit -->
+                <div class="package-card" onclick="selectPackage('quick', 2500, this)">
+                    <div class="package-price">€25</div>
+                    <div class="package-name">Quick Audit</div>
+                    <div class="package-duration">1 hour</div>
+                    <ul class="package-features">
+                        <li>Top 10 Pages</li>
+                        <li>Security Check</li>
+                        <li>Performance Score</li>
+                        <li>Key Issues Only</li>
+                        <li>Quick PDF</li>
+                    </ul>
+                </div>
+                
+                <!-- Standard Audit (Recommended) -->
+                <div class="package-card package-recommended" onclick="selectPackage('standard', 7500, this)">
+                    <div class="badge">RECOMMENDED</div>
+                    <div class="package-price">€75</div>
+                    <div class="package-name">Standard Audit</div>
+                    <div class="package-duration">2-3 hours</div>
+                    <ul class="package-features">
+                        <li>Top 20 Pages</li>
+                        <li>Full Security Review</li>
+                        <li>Performance Analysis</li>
+                        <li>SEO & UX Review</li>
+                        <li>Recommendations</li>
+                        <li>Detailed PDF Report</li>
+                    </ul>
+                </div>
+                
+                <!-- Pro Audit -->
+                <div class="package-card" onclick="selectPackage('pro', 15000, this)">
+                    <div class="package-price">€150</div>
+                    <div class="package-name">Pro Audit</div>
+                    <div class="package-duration">4-6 hours</div>
+                    <ul class="package-features">
+                        <li>Unlimited Pages</li>
+                        <li>Deep Security Audit</li>
+                        <li>Advanced Performance</li>
+                        <li>Full SEO Analysis</li>
+                        <li>Video Walkthrough</li>
+                        <li>Executive Summary</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <form id="audit-form" style="display: none;">
+            <div class="price-box" id="selected-package-box">
+                <div class="price" id="selected-price">€75</div>
+                <div class="price-description" id="selected-desc">Standard Audit Report</div>
             </div>
             
             <div class="features">
-                <h3>What You'll Get:</h3>
-                <ul>
-                    <li>Security Assessment</li>
-                    <li>Performance Analysis</li>
-                    <li>SEO & UX Review</li>
-                    <li>Actionable Recommendations</li>
-                    <li>PDF Report in 2-4 hours</li>
-                </ul>
+                <h3>Enter Your Website Details:</h3>
             </div>
             
             <div class="form-group">
@@ -274,6 +417,40 @@
         const errorDiv = document.getElementById('error-message');
         const successDiv = document.getElementById('success-message');
         const loadingDiv = document.getElementById('loading');
+        const packagesSection = document.querySelector('.packages-section');
+        
+        let selectedAmount = 7500; // Default: Standard €75
+        let selectedPackage = 'standard';
+        
+        // Package selection
+        function selectPackage(packageName, amountInCents, cardElement) {
+            selectedPackage = packageName;
+            selectedAmount = amountInCents;
+            
+            // Update UI
+            document.querySelectorAll('.package-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            cardElement.classList.add('selected');
+            
+            // Show form
+            form.style.display = 'block';
+            packagesSection.style.display = 'none';
+            
+            // Update price box
+            const priceInEuros = (amountInCents / 100).toFixed(2);
+            const packageNames = {
+                'quick': 'Quick Audit',
+                'standard': 'Standard Audit',
+                'pro': 'Pro Audit'
+            };
+            
+            document.getElementById('selected-price').textContent = '€' + priceInEuros;
+            document.getElementById('selected-desc').textContent = packageNames[packageName];
+            
+            // Scroll to form
+            form.scrollIntoView({ behavior: 'smooth' });
+        }
         
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -305,7 +482,8 @@
                     body: JSON.stringify({
                         website_url: websiteUrl,
                         customer_email: customerEmail,
-                        amount: 20000  // €200 in cents
+                        amount: selectedAmount,  // Use selected package amount
+                        package: selectedPackage  // Send package type
                     })
                 });
                 

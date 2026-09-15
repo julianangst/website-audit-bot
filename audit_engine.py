@@ -31,10 +31,17 @@ class WebsiteAuditBot:
         self.sendgrid_api_key = sendgrid_api_key
         self.from_email = from_email
     
-    def run_audit(self, website_url, customer_email, payment_id):
-        """Main audit orchestration"""
+    def run_audit(self, website_url, customer_email, payment_id, package='standard'):
+        """Main audit orchestration
+        
+        Args:
+            website_url: URL to audit
+            customer_email: Email for report delivery
+            payment_id: Stripe payment ID
+            package: 'quick' (€25), 'standard' (€75), or 'pro' (€150)
+        """
         try:
-            logger.info(f"Starting audit for {website_url} ({payment_id})")
+            logger.info(f"Starting {package} audit for {website_url} ({payment_id})")
             
             # Validate email
             if not self._is_valid_email(customer_email):
