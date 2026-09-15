@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 class WebsiteAuditBot:
     def __init__(self, anthropic_api_key, sendgrid_api_key, from_email):
-        self.client = Anthropic()
+        self.client = Anthropic(api_key=anthropic_api_key)
         self.anthropic_api_key = anthropic_api_key
         self.sendgrid_api_key = sendgrid_api_key
         self.from_email = from_email

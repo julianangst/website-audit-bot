@@ -38,7 +38,32 @@ bot = WebsiteAuditBot(
 @app.route('/', methods=['GET'])
 def index():
     """Serve landing page"""
-    return open('/app/static/index.html').read() if os.path.exists('/app/static/index.html') else open('static/index.html').read()
+    # Try multiple paths for static files
+    paths_to_try = ['/app/static/index.html', 'static/index.html', './static/index.html']
+    for path in paths_to_try:
+        if os.path.exists(path):
+            try:
+                return open(path).read()
+            except Exception as e:
+                logger.warning(f"Could not read {path}: {e}")
+    
+    # Fallback landing page if static file not found
+    return '''<!DOCTYPE html>
+    <html>
+    <head>
+        <title>Website Security Audit</title>
+        <style>
+            body { font-family: Arial; text-align: center; padding: 50px; }
+            .container { max-width: 600px; margin: 0 auto; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Website Security & Performance Audit</h1>
+            <p>Service temporarily unavailable. Please try again later.</p>
+        </div>
+    </body>
+    </html>'''
 
 @app.route('/config', methods=['GET'])
 def get_config():
