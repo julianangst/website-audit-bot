@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Security & Performance Audit - JARVIS</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #1e3a8a;
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        input[type="url"],
+        input[type="email"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        
+        input[type="url"]:focus,
+        input[type="email"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .features {
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            font-size: 14px;
+            color: #374151;
+        }
+        
+        .features h3 {
+            font-size: 14px;
+            margin-bottom: 12px;
+            color: #1f2937;
+        }
+        
+        .features ul {
+            list-style: none;
+        }
+        
+        .features li {
+            padding: 6px 0;
+            padding-left: 24px;
+            position: relative;
+        }
+        
+        .features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #16a34a;
+            font-weight: bold;
+        }
+        
+        .price-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .price {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .price-description {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        #submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        #submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        #submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .error {
+            color: #dc2626;
+            font-size: 14px;
+            padding: 12px;
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .success {
+            color: #16a34a;
+            font-size: 14px;
+            padding: 12px;
+            background: #dcfce7;
+            border: 1px solid #bbf7d0;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+        }
+        
+        .spinner {
+            border: 3px solid #e5e7eb;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 12px;
+            color: #9ca3af;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 20px;
+        }
+        
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Website Audit</h1>
+        <p class="subtitle">Security & Performance Analysis in Minutes</p>
+        
+        <div id="error-message" class="error"></div>
+        <div id="success-message" class="success"></div>
+        
+        <form id="audit-form">
+            <div class="price-box">
+                <div class="price">€200</div>
+                <div class="price-description">Complete Audit Report</div>
+            </div>
+            
+            <div class="features">
+                <h3>What You'll Get:</h3>
+                <ul>
+                    <li>Security Assessment</li>
+                    <li>Performance Analysis</li>
+                    <li>SEO & UX Review</li>
+                    <li>Actionable Recommendations</li>
+                    <li>PDF Report in 2-4 hours</li>
+                </ul>
+            </div>
+            
+            <div class="form-group">
+                <label for="website-url">Website URL</label>
+                <input 
+                    type="url" 
+                    id="website-url" 
+                    name="website_url" 
+                    placeholder="https://example.com or example.com"
+                    required
+                    autocomplete="off"
+                >
+            </div>
+            
+            <div class="form-group">
+                <label for="customer-email">Your Email</label>
+                <input 
+                    type="email" 
+                    id="customer-email" 
+                    name="customer_email" 
+                    placeholder="your@email.com"
+                    required
+                    autocomplete="email"
+                >
+            </div>
+            
+            <button type="submit" id="submit-btn">Get Audit Report</button>
+        </form>
+        
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Redirecting to secure payment...</p>
+        </div>
+        
+        <div class="footer">
+            <p>Secure payment powered by Stripe</p>
+            <p>Your report will be emailed to you within 24 hours</p>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('audit-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const errorDiv = document.getElementById('error-message');
+        const successDiv = document.getElementById('success-message');
+        const loadingDiv = document.getElementById('loading');
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const websiteUrl = document.getElementById('website-url').value.trim();
+            const customerEmail = document.getElementById('customer-email').value.trim();
+            
+            // Validation
+            if (!websiteUrl || !customerEmail) {
+                showError('Please fill in all fields');
+                return;
+            }
+            
+            if (!customerEmail.includes('@')) {
+                showError('Please enter a valid email');
+                return;
+            }
+            
+            // Create Stripe payment
+            submitBtn.disabled = true;
+            loadingDiv.style.display = 'block';
+            
+            try {
+                const response = await fetch('/create-checkout-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        website_url: websiteUrl,
+                        customer_email: customerEmail,
+                        amount: 20000  // €200 in cents
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to create payment session');
+                }
+                
+                const data = await response.json();
+                
+                if (data.url) {
+                    // Redirect to Stripe
+                    window.location.href = data.url;
+                } else {
+                    showError('Payment session creation failed');
+                    submitBtn.disabled = false;
+                    loadingDiv.style.display = 'none';
+                }
+            } catch (err) {
+                showError(err.message || 'An error occurred. Please try again.');
+                submitBtn.disabled = false;
+                loadingDiv.style.display = 'none';
+            }
+        });
+        
+        function showError(message) {
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            successDiv.style.display = 'none';
+        }
+        
+        function showSuccess(message) {
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            errorDiv.style.display = 'none';
+        }
+        
+        // Auto-format URL input
+        document.getElementById('website-url').addEventListener('blur', (e) => {
+            let url = e.target.value.trim();
+            if (url && !url.startsWith('http')) {
+                url = 'https://' + url;
+                e.target.value = url;
+            }
+        });
+    </script>
+</body>
+</html>
