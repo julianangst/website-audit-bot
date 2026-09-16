@@ -1,533 +1,356 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website Security & Performance Audit - JARVIS</title>
-    <script src="https://js.stripe.com/v3/"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 600px;
-            margin: 40px auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 40px;
-        }
-        
-        h1 {
-            color: #1e3a8a;
-            font-size: 28px;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        
-        .subtitle {
-            text-align: center;
-            color: #6b7280;
-            margin-bottom: 30px;
-            font-size: 16px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #374151;
-            font-size: 14px;
-        }
-        
-        input[type="url"],
-        input[type="email"] {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e5e7eb;
-            border-radius: 6px;
-            font-size: 14px;
-            transition: border-color 0.2s;
-        }
-        
-        input[type="url"]:focus,
-        input[type="email"]:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        
-        .features {
-            background: #f3f4f6;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            font-size: 14px;
-            color: #374151;
-        }
-        
-        .features h3 {
-            font-size: 14px;
-            margin-bottom: 12px;
-            color: #1f2937;
-        }
-        
-        .features ul {
-            list-style: none;
-        }
-        
-        .features li {
-            padding: 6px 0;
-            padding-left: 24px;
-            position: relative;
-        }
-        
-        .features li:before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: #16a34a;
-            font-weight: bold;
-        }
-        
-        .price-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .price {
-            font-size: 36px;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-        
-        .price-description {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-        
-        #submit-btn {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        
-        #submit-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
-        
-        #submit-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        
-        .error {
-            color: #dc2626;
-            font-size: 14px;
-            padding: 12px;
-            background: #fee2e2;
-            border: 1px solid #fecaca;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            display: none;
-        }
-        
-        .success {
-            color: #16a34a;
-            font-size: 14px;
-            padding: 12px;
-            background: #dcfce7;
-            border: 1px solid #bbf7d0;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            display: none;
-        }
-        
-        .loading {
-            display: none;
-            text-align: center;
-            color: #667eea;
-        }
-        
-        .spinner {
-            border: 3px solid #e5e7eb;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .footer {
-            text-align: center;
-            margin-top: 30px;
-            font-size: 12px;
-            color: #9ca3af;
-            border-top: 1px solid #e5e7eb;
-            padding-top: 20px;
-        }
-        
-        .footer a {
-            color: #667eea;
-            text-decoration: none;
-        }
-        
-        .packages-section {
-            margin-bottom: 40px;
-        }
-        
-        .packages-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        @media (min-width: 900px) {
-            .packages-grid {
-                grid-template-columns: 1fr 1fr 1fr;
-            }
-        }
-        
-        .package-card {
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
-            background: white;
-        }
-        
-        .package-card:hover {
-            border-color: #667eea;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
-            transform: translateY(-2px);
-        }
-        
-        .package-card.selected {
-            border-color: #667eea;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        
-        .package-recommended {
-            border: 2px solid #667eea;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
-            transform: scale(1.02);
-        }
-        
-        .badge {
-            display: inline-block;
-            background: #667eea;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-        
-        .package-price {
-            font-size: 32px;
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 5px;
-        }
-        
-        .package-name {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 5px;
-        }
-        
-        .package-duration {
-            font-size: 13px;
-            color: #9ca3af;
-            margin-bottom: 15px;
-        }
-        
-        .package-features {
-            list-style: none;
-            text-align: left;
-            font-size: 13px;
-            color: #374151;
-        }
-        
-        .package-features li {
-            padding: 6px 0;
-            padding-left: 20px;
-            position: relative;
-        }
-        
-        .package-features li:before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: #16a34a;
-            font-weight: bold;
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Website-Check — HAMKODERS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --petrol:#10312F;
+  --petrol-tief:#0A2120;
+  --gelb:#F2B705;
+  --grund:#EDE9E0;
+  --grund-tief:#DFDACD;
+  --rot:#C0442E;
+  --linie:rgba(237,233,224,.22);
+  --fg:var(--grund);
+  --bg:var(--petrol);
+}
+:root:not([data-theme="light"]){color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--fg);
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  font-size:17px;
+  line-height:1.65;
+}
+h1,h2,h3{font-family:"Barlow Condensed","Arial Narrow",Arial,sans-serif;font-weight:700;line-height:1.02;margin:0}
+.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500}
+.wrap{max-width:62rem;margin:0 auto;padding:0 1.5rem}
+
+/* Kopf */
+.kopf{border-bottom:1px solid var(--linie)}
+.kopf .wrap{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding-top:1.1rem;padding-bottom:1.1rem}
+.marke{font-family:"IBM Plex Mono",monospace;font-weight:500;letter-spacing:.14em;font-size:.82rem}
+.marke b{color:var(--gelb);font-weight:500}
+.kopf .ort{font-family:"IBM Plex Mono",monospace;font-size:.74rem;opacity:.55}
+
+/* Messmarken am Rand — Anleihe bei Betriebsdokumentation */
+.messfeld{position:relative;border-left:1px solid var(--linie);border-right:1px solid var(--linie)}
+.messfeld::before,.messfeld::after{
+  content:"";position:absolute;top:0;bottom:0;width:7px;
+  background-image:repeating-linear-gradient(to bottom,var(--linie) 0 1px,transparent 1px 28px);
+}
+.messfeld::before{left:-1px}
+.messfeld::after{right:-1px}
+
+/* Scanner */
+.scanner{padding:4.5rem 0 3.5rem}
+.scanner h1{font-size:clamp(2.6rem,7.5vw,5rem);max-width:16ch;letter-spacing:-.005em}
+.scanner p.lead{max-width:44ch;margin:1.4rem 0 2.4rem;font-size:1.06rem;opacity:.85}
+
+form{display:flex;flex-wrap:wrap;gap:.7rem;max-width:40rem}
+.feld{flex:1 1 17rem;position:relative}
+label.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+input[type=url]{
+  width:100%;padding:1.05rem 1.1rem;
+  background:var(--petrol-tief);
+  border:1px solid var(--linie);
+  color:var(--fg);
+  font-family:"IBM Plex Mono",monospace;font-size:1rem;
+  border-radius:2px;
+}
+input[type=url]::placeholder{color:rgba(237,233,224,.38)}
+input[type=url]:focus-visible{outline:2px solid var(--gelb);outline-offset:2px;border-color:transparent}
+button{
+  padding:1.05rem 1.6rem;
+  background:var(--gelb);color:var(--petrol-tief);
+  border:0;border-radius:2px;cursor:pointer;
+  font-family:"Barlow Condensed",sans-serif;font-weight:700;
+  font-size:1.22rem;letter-spacing:.01em;
+}
+button:hover{background:#ffc41f}
+button:focus-visible{outline:2px solid var(--grund);outline-offset:2px}
+button[disabled]{opacity:.5;cursor:default}
+.hinweis{margin-top:.9rem;font-size:.85rem;opacity:.55;max-width:44ch}
+
+/* Laufanzeige */
+.lauf{margin-top:2.6rem;display:none}
+.lauf[data-an]{display:block}
+.lauf .zeile{font-family:"IBM Plex Mono",monospace;font-size:.86rem;opacity:.75;margin:.35rem 0}
+.balken{height:3px;background:var(--linie);margin-top:1.1rem;overflow:hidden}
+.balken i{display:block;height:100%;width:0%;background:var(--gelb);transition:width .4s linear}
+
+/* Befund */
+.befund{display:none;padding:3rem 0 4rem;border-top:1px solid var(--linie)}
+.befund[data-an]{display:block}
+.kopfzeile{display:flex;flex-wrap:wrap;align-items:flex-end;gap:2rem;margin-bottom:2.4rem}
+.note{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:5.5rem;line-height:.82;color:var(--gelb)}
+.note small{display:block;font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:.72rem;color:var(--fg);opacity:.6;letter-spacing:.1em;margin-top:.7rem}
+.geprueft{font-family:"IBM Plex Mono",monospace;font-size:.82rem;opacity:.7;line-height:1.8}
+
+ol.liste{list-style:none;margin:0;padding:0;border-top:1px solid var(--linie)}
+ol.liste li{border-bottom:1px solid var(--linie);padding:1.3rem 0;display:grid;grid-template-columns:5.5rem 1fr;gap:1.2rem}
+.stufe{font-family:"IBM Plex Mono",monospace;font-size:.7rem;letter-spacing:.09em;padding-top:.3rem}
+.stufe.hoch{color:var(--rot)}
+.stufe.mittel{color:var(--gelb)}
+.stufe.niedrig{opacity:.55}
+.titel{font-weight:600;margin-bottom:.3rem}
+.wo{font-family:"IBM Plex Mono",monospace;font-size:.8rem;opacity:.6;word-break:break-all}
+
+.gesperrt{position:relative;margin-top:.2rem;border-bottom:1px solid var(--linie)}
+.gesperrt .verdeckt{filter:blur(6px);opacity:.4;pointer-events:none;user-select:none}
+.gesperrt .verdeckt li{border-bottom:1px solid var(--linie);padding:1.3rem 0;display:grid;grid-template-columns:5.5rem 1fr;gap:1.2rem;list-style:none}
+.schloss{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;gap:.6rem;padding:1rem;
+}
+.schloss .zahl{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:2.4rem;line-height:1}
+.schloss p{margin:0;max-width:34ch;font-size:.95rem;opacity:.85}
+
+/* Pakete */
+.pakete{padding:4rem 0;border-top:1px solid var(--linie)}
+.pakete h2{font-size:clamp(1.9rem,4.5vw,2.8rem);margin-bottom:.6rem}
+.pakete .unter{opacity:.75;max-width:48ch;margin:0 0 2.6rem}
+.reihe{display:grid;gap:1px;background:var(--linie);border:1px solid var(--linie)}
+@media(min-width:56rem){.reihe{grid-template-columns:repeat(3,1fr)}}
+.paket{background:var(--petrol);padding:1.9rem 1.6rem;display:flex;flex-direction:column;gap:.9rem}
+.paket.gewaehlt{background:var(--petrol-tief);box-shadow:inset 0 3px 0 var(--gelb)}
+.paket h3{font-size:1.75rem}
+.preis{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:3rem;line-height:1;color:var(--gelb)}
+.paket ul{list-style:none;margin:0;padding:0;font-size:.93rem}
+.paket li{padding:.34rem 0;opacity:.85;border-bottom:1px dotted var(--linie)}
+.paket li:last-child{border-bottom:0}
+.paket a{
+  margin-top:auto;display:block;text-align:center;text-decoration:none;
+  padding:.85rem 1rem;border:1px solid var(--gelb);color:var(--gelb);border-radius:2px;
+  font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:1.15rem;
+}
+.paket.gewaehlt a{background:var(--gelb);color:var(--petrol-tief)}
+.paket a:hover{background:var(--gelb);color:var(--petrol-tief)}
+.paket a:focus-visible{outline:2px solid var(--grund);outline-offset:2px}
+
+/* Fuß */
+.fuss{border-top:1px solid var(--linie);padding:2.4rem 0 3.4rem;font-size:.85rem;opacity:.6}
+.fuss p{margin:.3rem 0}
+
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>🔍 Website Audit</h1>
-        <p class="subtitle">Security & Performance Analysis in Minutes</p>
-        
-        <div id="error-message" class="error"></div>
-        <div id="success-message" class="success"></div>
-        
-        <!-- Package Selection -->
-        <div class="packages-section">
-            <h2 style="text-align: center; color: #1f2937; margin-bottom: 20px; font-size: 18px;">Choose Your Package</h2>
-            
-            <div class="packages-grid">
-                <!-- Quick Audit -->
-                <div class="package-card" onclick="selectPackage('quick', 2500, this)">
-                    <div class="package-price">€25</div>
-                    <div class="package-name">Quick Audit</div>
-                    <div class="package-duration">1 hour</div>
-                    <ul class="package-features">
-                        <li>Top 10 Pages</li>
-                        <li>Security Check</li>
-                        <li>Performance Score</li>
-                        <li>Key Issues Only</li>
-                        <li>Quick PDF</li>
-                    </ul>
-                </div>
-                
-                <!-- Standard Audit (Recommended) -->
-                <div class="package-card package-recommended" onclick="selectPackage('standard', 7500, this)">
-                    <div class="badge">RECOMMENDED</div>
-                    <div class="package-price">€75</div>
-                    <div class="package-name">Standard Audit</div>
-                    <div class="package-duration">2-3 hours</div>
-                    <ul class="package-features">
-                        <li>Top 20 Pages</li>
-                        <li>Full Security Review</li>
-                        <li>Performance Analysis</li>
-                        <li>SEO & UX Review</li>
-                        <li>Recommendations</li>
-                        <li>Detailed PDF Report</li>
-                    </ul>
-                </div>
-                
-                <!-- Pro Audit -->
-                <div class="package-card" onclick="selectPackage('pro', 15000, this)">
-                    <div class="package-price">€150</div>
-                    <div class="package-name">Pro Audit</div>
-                    <div class="package-duration">4-6 hours</div>
-                    <ul class="package-features">
-                        <li>Unlimited Pages</li>
-                        <li>Deep Security Audit</li>
-                        <li>Advanced Performance</li>
-                        <li>Full SEO Analysis</li>
-                        <li>Video Walkthrough</li>
-                        <li>Executive Summary</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        
-        <form id="audit-form" style="display: none;">
-            <div class="price-box" id="selected-package-box">
-                <div class="price" id="selected-price">€75</div>
-                <div class="price-description" id="selected-desc">Standard Audit Report</div>
-            </div>
-            
-            <div class="features">
-                <h3>Enter Your Website Details:</h3>
-            </div>
-            
-            <div class="form-group">
-                <label for="website-url">Website URL</label>
-                <input 
-                    type="url" 
-                    id="website-url" 
-                    name="website_url" 
-                    placeholder="https://example.com or example.com"
-                    required
-                    autocomplete="off"
-                >
-            </div>
-            
-            <div class="form-group">
-                <label for="customer-email">Your Email</label>
-                <input 
-                    type="email" 
-                    id="customer-email" 
-                    name="customer_email" 
-                    placeholder="your@email.com"
-                    required
-                    autocomplete="email"
-                >
-            </div>
-            
-            <button type="submit" id="submit-btn">Get Audit Report</button>
-        </form>
-        
-        <div id="loading" class="loading">
-            <div class="spinner"></div>
-            <p>Redirecting to secure payment...</p>
-        </div>
-        
-        <div class="footer">
-            <p>Secure payment powered by Stripe</p>
-            <p>Your report will be emailed to you within 24 hours</p>
-        </div>
+
+<header class="kopf">
+  <div class="wrap">
+    <span class="marke"><b>HAM</b>KODERS · WEBSITE-CHECK</span>
+    <span class="ort">GRAZ / AT</span>
+  </div>
+</header>
+
+<main class="wrap messfeld">
+
+  <section class="scanner">
+    <h1>Finden Sie heraus, was auf Ihrer Website offen liegt.</h1>
+    <p class="lead">Geben Sie Ihre Adresse ein. Der Check läuft automatisch und zeigt Ihnen in etwa einer Minute, was er gefunden hat — ohne Anmeldung, ohne Kosten.</p>
+
+    <form id="form">
+      <div class="feld">
+        <label class="sr" for="url">Adresse Ihrer Website</label>
+        <input type="url" id="url" name="url" placeholder="ihre-firma.at" required autocomplete="url" inputmode="url">
+      </div>
+      <button type="submit" id="start">Check starten</button>
+    </form>
+    <p class="hinweis">Geprüft wird nur, was öffentlich erreichbar ist. Es wird nichts verändert und nichts gespeichert, das Sie nicht selbst eingeben.</p>
+
+    <div class="lauf" id="lauf" aria-live="polite">
+      <div id="zeilen"></div>
+      <div class="balken"><i id="fortschritt"></i></div>
+    </div>
+  </section>
+
+  <section class="befund" id="befund" aria-live="polite">
+    <div class="kopfzeile">
+      <div class="note" id="note">—<small>GESAMTBEWERTUNG</small></div>
+      <div class="geprueft" id="geprueft"></div>
     </div>
 
-    <script>
-        const form = document.getElementById('audit-form');
-        const submitBtn = document.getElementById('submit-btn');
-        const errorDiv = document.getElementById('error-message');
-        const successDiv = document.getElementById('success-message');
-        const loadingDiv = document.getElementById('loading');
-        const packagesSection = document.querySelector('.packages-section');
-        
-        let selectedAmount = 7500; // Default: Standard €75
-        let selectedPackage = 'standard';
-        
-        // Package selection
-        function selectPackage(packageName, amountInCents, cardElement) {
-            selectedPackage = packageName;
-            selectedAmount = amountInCents;
-            
-            // Update UI
-            document.querySelectorAll('.package-card').forEach(card => {
-                card.classList.remove('selected');
-            });
-            cardElement.classList.add('selected');
-            
-            // Show form
-            form.style.display = 'block';
-            packagesSection.style.display = 'none';
-            
-            // Update price box
-            const priceInEuros = (amountInCents / 100).toFixed(2);
-            const packageNames = {
-                'quick': 'Quick Audit',
-                'standard': 'Standard Audit',
-                'pro': 'Pro Audit'
-            };
-            
-            document.getElementById('selected-price').textContent = '€' + priceInEuros;
-            document.getElementById('selected-desc').textContent = packageNames[packageName];
-            
-            // Scroll to form
-            form.scrollIntoView({ behavior: 'smooth' });
-        }
-        
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const websiteUrl = document.getElementById('website-url').value.trim();
-            const customerEmail = document.getElementById('customer-email').value.trim();
-            
-            // Validation
-            if (!websiteUrl || !customerEmail) {
-                showError('Please fill in all fields');
-                return;
-            }
-            
-            if (!customerEmail.includes('@')) {
-                showError('Please enter a valid email');
-                return;
-            }
-            
-            // Create Stripe payment
-            submitBtn.disabled = true;
-            loadingDiv.style.display = 'block';
-            
-            try {
-                const response = await fetch('/create-checkout-session', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        website_url: websiteUrl,
-                        customer_email: customerEmail,
-                        amount: selectedAmount,  // Use selected package amount
-                        package: selectedPackage  // Send package type
-                    })
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Failed to create payment session');
-                }
-                
-                const data = await response.json();
-                
-                if (data.url) {
-                    // Redirect to Stripe
-                    window.location.href = data.url;
-                } else {
-                    showError('Payment session creation failed');
-                    submitBtn.disabled = false;
-                    loadingDiv.style.display = 'none';
-                }
-            } catch (err) {
-                showError(err.message || 'An error occurred. Please try again.');
-                submitBtn.disabled = false;
-                loadingDiv.style.display = 'none';
-            }
-        });
-        
-        function showError(message) {
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-            successDiv.style.display = 'none';
-        }
-        
-        function showSuccess(message) {
-            successDiv.textContent = message;
-            successDiv.style.display = 'block';
-            errorDiv.style.display = 'none';
-        }
-        
-        // Auto-format URL input
-        document.getElementById('website-url').addEventListener('blur', (e) => {
-            let url = e.target.value.trim();
-            if (url && !url.startsWith('http')) {
-                url = 'https://' + url;
-                e.target.value = url;
-            }
-        });
-    </script>
+    <ol class="liste" id="offen"></ol>
+
+    <div class="gesperrt">
+      <ul class="verdeckt" aria-hidden="true">
+        <li><span class="stufe">HOCH</span><span><span class="titel">Veraltete Komponente mit bekannter Lücke</span><span class="wo">/wp-content/plugins/…</span></span></li>
+        <li><span class="stufe">MITTEL</span><span><span class="titel">Formular ohne Schutz gegen Mehrfachversand</span><span class="wo">/kontakt</span></span></li>
+        <li><span class="stufe">MITTEL</span><span><span class="titel">Unverschlüsselte Ressource auf sicherer Seite</span><span class="wo">/assets/…</span></span></li>
+      </ul>
+      <div class="schloss">
+        <span class="zahl" id="rest">+0</span>
+        <p id="resttext">weitere Befunde stehen im vollständigen Bericht — mit genauer Fundstelle und Behebungsschritt.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="pakete">
+    <h2>Den vollständigen Bericht anfordern</h2>
+    <p class="unter">Sie bekommen ein PDF mit jedem Befund, der genauen Stelle, einer Einstufung nach Dringlichkeit und dem konkreten Schritt zur Behebung.</p>
+
+    <div class="reihe">
+      <div class="paket">
+        <h3>Kurz</h3>
+        <span class="preis">€25</span>
+        <ul>
+          <li>Die zehn wichtigsten Seiten</li>
+          <li>Sicherheit und Ladezeit</li>
+          <li>Bericht binnen einer Stunde</li>
+        </ul>
+        <a href="#" data-paket="quick">€25 — Kurzbericht</a>
+      </div>
+
+      <div class="paket gewaehlt">
+        <h3>Standard</h3>
+        <span class="preis">€75</span>
+        <ul>
+          <li>Die zwanzig wichtigsten Seiten</li>
+          <li>Zusätzlich Formulare und Zugänge</li>
+          <li>Reihung nach Dringlichkeit</li>
+          <li>Bericht binnen drei Stunden</li>
+        </ul>
+        <a href="#" data-paket="standard">€75 — Standardbericht</a>
+      </div>
+
+      <div class="paket">
+        <h3>Vollständig</h3>
+        <span class="preis">€150</span>
+        <ul>
+          <li>Alle erreichbaren Seiten</li>
+          <li>Alle Prüfungen</li>
+          <li>Behebung nach Aufwand geordnet</li>
+          <li>Bericht binnen sechs Stunden</li>
+        </ul>
+        <a href="#" data-paket="pro">€150 — Vollbericht</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="fuss">
+  <div class="wrap">
+    <p>HAMKODERS · Julian Angst · Graz</p>
+    <p>Geprüft wird ausschließlich öffentlich erreichbarer Inhalt. Kein Eindringen, keine Veränderung, keine Belastungstests.</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var form=document.getElementById('form'),
+      knopf=document.getElementById('start'),
+      lauf=document.getElementById('lauf'),
+      zeilen=document.getElementById('zeilen'),
+      fortschritt=document.getElementById('fortschritt'),
+      befund=document.getElementById('befund'),
+      note=document.getElementById('note'),
+      geprueft=document.getElementById('geprueft'),
+      offen=document.getElementById('offen'),
+      rest=document.getElementById('rest'),
+      resttext=document.getElementById('resttext');
+
+  var schritte=[
+    'Adresse aufgelöst',
+    'Startseite geladen',
+    'Verschlüsselung geprüft',
+    'Sicherheitsangaben im Kopf gelesen',
+    'Eingesetzte Komponenten erkannt',
+    'Öffentlich erreichbare Pfade getestet',
+    'Ladezeit gemessen',
+    'Befunde eingestuft'
+  ];
+
+  function normalisieren(w){
+    w=w.trim();
+    if(!/^https?:\/\//i.test(w)) w='https://'+w;
+    return w;
+  }
+
+  function zeigen(d){
+    note.innerHTML=d.score+'<small>GESAMTBEWERTUNG</small>';
+    geprueft.textContent=d.host+'\n'+d.seiten+' Seiten geprüft\n'+d.gefunden+' Befunde insgesamt';
+    geprueft.style.whiteSpace='pre-line';
+    offen.innerHTML='';
+    d.offen.forEach(function(b){
+      var li=document.createElement('li');
+      var s=document.createElement('span');
+      s.className='stufe '+b.klasse; s.textContent=b.stufe;
+      var t=document.createElement('span');
+      var n=document.createElement('span'); n.className='titel'; n.textContent=b.titel;
+      var w=document.createElement('span'); w.className='wo'; w.textContent=b.wo;
+      t.appendChild(n); t.appendChild(w);
+      li.appendChild(s); li.appendChild(t);
+      offen.appendChild(li);
+    });
+    var uebrig=Math.max(0,d.gefunden-d.offen.length);
+    rest.textContent='+'+uebrig;
+    resttext.textContent=uebrig===1
+      ? 'weiterer Befund steht im vollständigen Bericht — mit genauer Fundstelle und Behebungsschritt.'
+      : 'weitere Befunde stehen im vollständigen Bericht — mit genauer Fundstelle und Behebungsschritt.';
+    befund.setAttribute('data-an','');
+    befund.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+  function fehler(text){
+    zeilen.innerHTML='<div class="zeile" style="color:var(--rot)">'+text+'</div>';
+    fortschritt.style.width='0%';
+    knopf.disabled=false; knopf.textContent='Check starten';
+  }
+
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    var ziel=normalisieren(document.getElementById('url').value);
+    knopf.disabled=true; knopf.textContent='läuft …';
+    befund.removeAttribute('data-an');
+    zeilen.innerHTML=''; fortschritt.style.width='0%';
+    lauf.setAttribute('data-an','');
+
+    var i=0;
+    var takt=setInterval(function(){
+      if(i<schritte.length){
+        var z=document.createElement('div');
+        z.className='zeile'; z.textContent='› '+schritte[i];
+        zeilen.appendChild(z);
+        fortschritt.style.width=Math.round((i+1)/schritte.length*100)+'%';
+        i++;
+      } else { clearInterval(takt); }
+    },520);
+
+    fetch('/api/free-scan',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({url:ziel})
+    })
+    .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function(d){
+      clearInterval(takt);
+      fortschritt.style.width='100%';
+      knopf.disabled=false; knopf.textContent='Andere Adresse prüfen';
+      zeigen(d);
+    })
+    .catch(function(){
+      clearInterval(takt);
+      fehler('Die Adresse war nicht erreichbar. Bitte prüfen Sie die Schreibweise und versuchen Sie es erneut.');
+    });
+  });
+
+  document.querySelectorAll('[data-paket]').forEach(function(a){
+    a.addEventListener('click',function(e){
+      e.preventDefault();
+      var u=document.getElementById('url').value.trim();
+      window.location.href='/checkout?paket='+this.dataset.paket+(u?'&url='+encodeURIComponent(normalisieren(u)):'');
+    });
+  });
+})();
+</script>
 </body>
 </html>
